@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">FocusLock needs accessibility access to monitor which apps are being opened and block paused apps. This helps you stay focused by preventing access to distracting apps during your focus period.</string>
+</resources>
