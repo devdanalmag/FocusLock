@@ -40,6 +40,14 @@ export default function RootLayout() {
           name="achievements"
           options={{ animation: 'slide_from_right' }}
         />
+        <Stack.Screen
+          name="app-limits"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="add-limit"
+          options={{ animation: 'slide_from_bottom' }}
+        />
       </Stack>
     </View>
   );

@@ -245,6 +245,14 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.viewStatsButton}
+            onPress={() => router.push('/app-limits')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="timer-outline" size={14} color="#f59e0b" style={{ marginRight: 4 }} />
+            <Text style={[styles.viewStatsText, { color: '#f59e0b' }]}>Limits</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.viewStatsButton}
             onPress={() => router.push('/schedules')}
             activeOpacity={0.7}
           >

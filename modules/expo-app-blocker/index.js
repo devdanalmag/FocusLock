@@ -130,3 +130,61 @@ export async function shareText(text) {
     }
   }
 }
+
+/**
+ * Set daily time limits per app (JSON object: { packageName: limitMinutes })
+ */
+export async function setDailyLimits(limitsObj) {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      return await ExpoAppBlocker.setDailyLimits(JSON.stringify(limitsObj));
+    } catch (e) {
+      console.warn('Failed to set daily limits:', e);
+    }
+  }
+}
+
+/**
+ * Get daily time limits per app
+ */
+export async function getDailyLimits() {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      const json = await ExpoAppBlocker.getDailyLimits();
+      return JSON.parse(json || '{}');
+    } catch (e) {
+      console.warn('Failed to get daily limits:', e);
+    }
+  }
+  return {};
+}
+
+/**
+ * Get today's cumulative foreground usage time per app (ms)
+ */
+export async function getDailyUsageTime() {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      const json = await ExpoAppBlocker.getDailyUsageTime();
+      return JSON.parse(json || '{}');
+    } catch (e) {
+      console.warn('Failed to get daily usage:', e);
+    }
+  }
+  return {};
+}
+
+/**
+ * Get today's open count per app
+ */
+export async function getAppOpenCounts() {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      const json = await ExpoAppBlocker.getAppOpenCounts();
+      return JSON.parse(json || '{}');
+    } catch (e) {
+      console.warn('Failed to get open counts:', e);
+    }
+  }
+  return {};
+}

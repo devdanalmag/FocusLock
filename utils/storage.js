@@ -3,7 +3,7 @@
  * Manages paused apps data in AsyncStorage and SharedPreferences sync
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setBlockedPackages } from '../modules/expo-app-blocker';
+import { setBlockedPackages, setDailyLimits as setNativeDailyLimits, getDailyLimits as getNativeDailyLimits, getDailyUsageTime, getAppOpenCounts } from '../modules/expo-app-blocker';
 import { setBlockedNotificationPackages } from '../modules/expo-notification-policy';
 
 const PAUSED_APPS_KEY = '@focuslock_paused_apps';
@@ -532,5 +532,85 @@ export async function setBedtimeMode(startHour, endHour, enabled) {
     await saveSchedules(schedules);
   } catch (e) {
     console.warn('Failed to set bedtime mode:', e);
+  }
+}
+
+// ============== DAILY APP LIMITS ==============
+
+const DAILY_LIMITS_KEY = '@focuslock_daily_limits';
+
+/**
+ * Get all daily app limits { packageName: { limitMinutes, appName } }
+ */
+export async function getAppDailyLimits() {
+  try {
+    const data = await AsyncStorage.getItem(DAILY_LIMITS_KEY);
+    if (!data) return {};
+    return JSON.parse(data);
+  } catch (e) {
+    return {};
+  }
+}
+
+/**
+ * Set/update a daily limit for an app
+ */
+export async function setAppDailyLimit(packageName, limitMinutes, appName) {
+  try {
+    const limits = await getAppDailyLimits();
+    limits[packageName] = { limitMinutes, appName };
+    await AsyncStorage.setItem(DAILY_LIMITS_KEY, JSON.stringify(limits));
+
+    // Sync to native: { package: minutes }
+    const nativeLimits = {};
+    for (const [pkg, val] of Object.entries(limits)) {
+      nativeLimits[pkg] = val.limitMinutes;
+    }
+    await setNativeDailyLimits(nativeLimits);
+  } catch (e) {
+    console.warn('Failed to set daily limit:', e);
+  }
+}
+
+/**
+ * Remove a daily limit for an app
+ */
+export async function removeAppDailyLimit(packageName) {
+  try {
+    const limits = await getAppDailyLimits();
+    delete limits[packageName];
+    await AsyncStorage.setItem(DAILY_LIMITS_KEY, JSON.stringify(limits));
+
+    const nativeLimits = {};
+    for (const [pkg, val] of Object.entries(limits)) {
+      nativeLimits[pkg] = val.limitMinutes;
+    }
+    await setNativeDailyLimits(nativeLimits);
+  } catch (e) {
+    console.warn('Failed to remove daily limit:', e);
+  }
+}
+
+/**
+ * Calculate time saved today (difference between limit and actual usage for over-limit apps)
+ */
+export async function getTimeSavedToday() {
+  try {
+    const limits = await getAppDailyLimits();
+    const usage = await getDailyUsageTime();
+    let savedMs = 0;
+
+    for (const [pkg, val] of Object.entries(limits)) {
+      const limitMs = val.limitMinutes * 60 * 1000;
+      const usedMs = usage[pkg] || 0;
+      if (usedMs >= limitMs) {
+        // Time saved = estimated usage without limit - actual limit
+        // Conservative estimate: they would have used 2x more without the block
+        savedMs += limitMs;
+      }
+    }
+    return savedMs;
+  } catch (e) {
+    return 0;
   }
 }

@@ -31,6 +31,7 @@ class BlockedAppActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         val blockedPackage = intent.getStringExtra("blocked_package") ?: ""
+        val blockReason = intent.getStringExtra("block_reason") ?: "paused"
 
         // Get paused app info from shared prefs
         val prefs = getSharedPreferences("focuslock_data", Context.MODE_PRIVATE)
@@ -66,6 +67,18 @@ class BlockedAppActivity : Activity() {
         val attemptKey = "attempts_${today}_${blockedPackage}"
         val todayAttempts = attemptsPrefs.getInt(attemptKey, 0)
 
+        // Choose title/icon based on reason
+        val titleText = when (blockReason) {
+            "time_limit" -> "Daily Limit Reached"
+            "scheduled" -> "Schedule Active"
+            else -> "App Paused"
+        }
+        val iconText = when (blockReason) {
+            "time_limit" -> "⏰"
+            "scheduled" -> "📅"
+            else -> "🔒"
+        }
+
         // Build UI programmatically
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -76,7 +89,7 @@ class BlockedAppActivity : Activity() {
 
         // Lock icon
         val lockIcon = TextView(this).apply {
-            text = "🔒"
+            text = iconText
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 40)
@@ -85,7 +98,7 @@ class BlockedAppActivity : Activity() {
 
         // Title
         val title = TextView(this).apply {
-            text = "App Paused"
+            text = titleText
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             setTextColor(Color.WHITE)
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)

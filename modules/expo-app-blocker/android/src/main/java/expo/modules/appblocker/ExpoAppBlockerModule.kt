@@ -167,5 +167,80 @@ class ExpoAppBlockerModule : Module() {
                 promise.reject("ERR", "Failed to share: ${e.message}", e)
             }
         }
+
+        AsyncFunction("setDailyLimits") { limitsJson: String, promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.reject("ERR", "Context not available", null)
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_daily_limits", Context.MODE_PRIVATE)
+                prefs.edit().putString("limits", limitsJson).apply()
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("ERR", "Failed to set daily limits: ${e.message}", e)
+            }
+        }
+
+        AsyncFunction("getDailyLimits") { promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.resolve("{}")
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_daily_limits", Context.MODE_PRIVATE)
+                promise.resolve(prefs.getString("limits", "{}"))
+            } catch (e: Exception) {
+                promise.resolve("{}")
+            }
+        }
+
+        AsyncFunction("getDailyUsageTime") { promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.resolve("{}")
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_usage_time", Context.MODE_PRIVATE)
+                val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                val today = dateFormat.format(java.util.Date())
+                
+                val result = org.json.JSONObject()
+                val allPrefs = prefs.all
+                for ((key, value) in allPrefs) {
+                    if (key.startsWith("usage_${today}_") && value is Long) {
+                        val packageName = key.removePrefix("usage_${today}_")
+                        result.put(packageName, value)
+                    }
+                }
+                promise.resolve(result.toString())
+            } catch (e: Exception) {
+                promise.resolve("{}")
+            }
+        }
+
+        AsyncFunction("getAppOpenCounts") { promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.resolve("{}")
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_usage_time", Context.MODE_PRIVATE)
+                val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                val today = dateFormat.format(java.util.Date())
+                
+                val result = org.json.JSONObject()
+                val allPrefs = prefs.all
+                for ((key, value) in allPrefs) {
+                    if (key.startsWith("opens_${today}_") && value is Int) {
+                        val packageName = key.removePrefix("opens_${today}_")
+                        result.put(packageName, value)
+                    }
+                }
+                promise.resolve(result.toString())
+            } catch (e: Exception) {
+                promise.resolve("{}")
+            }
+        }
     }
 }

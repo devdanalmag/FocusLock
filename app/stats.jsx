@@ -12,8 +12,8 @@ import {
 import { router } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { getAppUsageStats, getDailyUsageTotals } from '../modules/expo-app-manager';
-import { getBlockAttempts, getTodayTotalAttempts, shareText } from '../modules/expo-app-blocker';
-import { getStreak } from '../utils/storage';
+import { getBlockAttempts, getTodayTotalAttempts, shareText, getDailyUsageTime, getAppOpenCounts } from '../modules/expo-app-blocker';
+import { getStreak, getTimeSavedToday } from '../utils/storage';
 
 export default function StatsScreen() {
   const [usageStats, setUsageStats] = useState([]);
@@ -22,6 +22,8 @@ export default function StatsScreen() {
   const [todayAttempts, setTodayAttempts] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState('today');
+  const [timeSavedMs, setTimeSavedMs] = useState(0);
+  const [openCounts, setOpenCounts] = useState({});
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -46,6 +48,13 @@ export default function StatsScreen() {
       setDailyTotals(daily || []);
       setBlockAttempts(attempts || []);
       setTodayAttempts(totalAttempts || 0);
+
+      const [saved, opens] = await Promise.all([
+        getTimeSavedToday(),
+        getAppOpenCounts(),
+      ]);
+      setTimeSavedMs(saved || 0);
+      setOpenCounts(opens || {});
     } catch (e) {
       console.warn('Failed to load stats:', e);
     }
@@ -168,6 +177,13 @@ export default function StatsScreen() {
               <Text style={styles.summaryValue}>{usageStats.length}</Text>
               <Text style={styles.summaryLabel}>Apps Used</Text>
             </View>
+            {timeSavedMs > 0 && (
+              <View style={[styles.summaryCard, { borderColor: 'rgba(74, 222, 128, 0.15)', backgroundColor: 'rgba(74, 222, 128, 0.06)' }]}>
+                <Ionicons name="shield-checkmark-outline" size={20} color="#4ade80" />
+                <Text style={[styles.summaryValue, { color: '#4ade80' }]}>{formatTime(timeSavedMs)}</Text>
+                <Text style={styles.summaryLabel}>Time Saved</Text>
+              </View>
+            )}
           </View>
 
           {/* Top Apps Section */}
@@ -310,6 +326,32 @@ export default function StatsScreen() {
             <Ionicons name="share-social-outline" size={18} color="#06b6d4" style={{ marginRight: 8 }} />
             <Text style={styles.shareButtonText}>Share with Accountability Partner</Text>
           </TouchableOpacity>
+
+          {/* App Open Counts */}
+          {Object.keys(openCounts).length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="finger-print-outline" size={18} color="#f59e0b" style={{ marginRight: 8 }} />
+                <Text style={styles.sectionTitle}>App Opens Today</Text>
+              </View>
+              <View style={styles.sectionCard}>
+                {Object.entries(openCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 10)
+                  .map(([pkg, count]) => (
+                    <View key={pkg} style={styles.attemptRow}>
+                      <View style={[styles.attemptDot, { backgroundColor: '#f59e0b' }]} />
+                      <Text style={styles.attemptPackage} numberOfLines={1}>
+                        {pkg.split('.').pop()}
+                      </Text>
+                      <View style={[styles.attemptBadge, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                        <Text style={[styles.attemptCount, { color: '#f59e0b' }]}>{count}×</Text>
+                      </View>
+                    </View>
+                  ))}
+              </View>
+            </View>
+          )}
 
           <View style={{ height: 40 }} />
         </ScrollView>
