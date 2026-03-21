@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { getPausedApps, getStats, formatRemaining, getProgress, getDaysRemaining, updateStreak, getStreak, checkAchievements, BADGE_DEFINITIONS } from '../utils/storage';
+import { getPausedApps, getStats, formatRemaining, getProgress, getDaysRemaining, updateStreak, getStreak, checkAchievements, BADGE_DEFINITIONS, getActiveFocusSession, stopFocusSession } from '../utils/storage';
 import { getTodayTotalAttempts } from '../modules/expo-app-blocker';
 
 export default function DashboardScreen() {
@@ -23,6 +23,8 @@ export default function DashboardScreen() {
   const [todayAttempts, setTodayAttempts] = useState(0);
   const [newBadges, setNewBadges] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [focusSession, setFocusSession] = useState(null);
+  const [focusCountdown, setFocusCountdown] = useState('');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const fabScale = useRef(new Animated.Value(0)).current;
@@ -83,6 +85,9 @@ export default function DashboardScreen() {
       setNewBadges(newlyUnlocked);
       setTimeout(() => setNewBadges([]), 5000);
     }
+    // Check focus session
+    const session = await getActiveFocusSession();
+    setFocusSession(session);
   };
 
   const onRefresh = async () => {
@@ -245,6 +250,14 @@ export default function DashboardScreen() {
             <Text style={{ fontSize: 14 }}>🏆</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            style={[styles.viewStatsButton, { borderColor: 'rgba(16, 185, 129, 0.2)', backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}
+            onPress={() => router.push('/focus-session')}
+            activeOpacity={0.7}
+          >
+            <Text style={{ fontSize: 14, marginRight: 4 }}>🎯</Text>
+            <Text style={[styles.viewStatsText, { color: '#10b981' }]}>Focus</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.viewStatsButton}
             onPress={() => router.push('/app-limits')}
             activeOpacity={0.7}
@@ -282,6 +295,24 @@ export default function DashboardScreen() {
             }).join(', ')}
           </Text>
         </View>
+      )}
+
+      {/* Focus Session Banner */}
+      {focusSession && (
+        <TouchableOpacity
+          style={styles.focusBanner}
+          onPress={() => router.push('/focus-session')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.focusBannerLeft}>
+            <Text style={{ fontSize: 18, marginRight: 8 }}>🎯</Text>
+            <View>
+              <Text style={styles.focusBannerTitle}>Focus Session Active</Text>
+              <Text style={styles.focusBannerSub}>Tap to view countdown</Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#10b981" />
+        </TouchableOpacity>
       )}
 
       {/* List */}
@@ -652,5 +683,32 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.3,
+  },
+  focusBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 24,
+    marginBottom: 12,
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  focusBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  focusBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#10b981',
+  },
+  focusBannerSub: {
+    fontSize: 11,
+    color: 'rgba(16, 185, 129, 0.6)',
+    marginTop: 1,
+    fontWeight: '500',
   },
 });

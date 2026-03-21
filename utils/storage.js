@@ -3,7 +3,7 @@
  * Manages paused apps data in AsyncStorage and SharedPreferences sync
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setBlockedPackages, setDailyLimits as setNativeDailyLimits, getDailyLimits as getNativeDailyLimits, getDailyUsageTime, getAppOpenCounts } from '../modules/expo-app-blocker';
+import { setBlockedPackages, setDailyLimits as setNativeDailyLimits, getDailyLimits as getNativeDailyLimits, getDailyUsageTime, getAppOpenCounts, setFocusSession as setNativeFocusSession, getFocusSession as getNativeFocusSession, setExceptedPackages as setNativeExceptedPackages } from '../modules/expo-app-blocker';
 import { setBlockedNotificationPackages } from '../modules/expo-notification-policy';
 
 const PAUSED_APPS_KEY = '@focuslock_paused_apps';
@@ -612,5 +612,131 @@ export async function getTimeSavedToday() {
     return savedMs;
   } catch (e) {
     return 0;
+  }
+}
+
+// ============== FOCUS SESSION ==============
+
+const FOCUS_SESSION_KEY = '@focuslock_focus_session';
+
+/**
+ * Start a new focus session
+ * @param {number} durationMinutes - duration in minutes
+ */
+export async function startFocusSession(durationMinutes) {
+  try {
+    const now = Date.now();
+    const session = {
+      active: true,
+      startTime: now,
+      endTime: now + (durationMinutes * 60 * 1000),
+      durationMinutes,
+    };
+    await AsyncStorage.setItem(FOCUS_SESSION_KEY, JSON.stringify(session));
+    await setNativeFocusSession(session);
+    return session;
+  } catch (e) {
+    console.warn('Failed to start focus session:', e);
+    return null;
+  }
+}
+
+/**
+ * Stop the active focus session
+ */
+export async function stopFocusSession() {
+  try {
+    const emptySession = { active: false };
+    await AsyncStorage.setItem(FOCUS_SESSION_KEY, JSON.stringify(emptySession));
+    await setNativeFocusSession(emptySession);
+  } catch (e) {
+    console.warn('Failed to stop focus session:', e);
+  }
+}
+
+/**
+ * Get the current focus session (or null if none active)
+ */
+export async function getActiveFocusSession() {
+  try {
+    const data = await AsyncStorage.getItem(FOCUS_SESSION_KEY);
+    if (!data) return null;
+    const session = JSON.parse(data);
+    if (!session.active) return null;
+
+    // Check if expired
+    if (Date.now() > session.endTime) {
+      await stopFocusSession();
+      return null;
+    }
+    return session;
+  } catch (e) {
+    return null;
+  }
+}
+
+// ============== APP EXCEPTIONS ==============
+
+const EXCEPTED_APPS_KEY = '@focuslock_excepted_apps';
+
+/**
+ * Get all excepted (whitelisted) apps
+ * @returns {Promise<Array>} Array of { name, packageName, icon }
+ */
+export async function getExceptedApps() {
+  try {
+    const data = await AsyncStorage.getItem(EXCEPTED_APPS_KEY);
+    if (!data) return [];
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Add an app to the exception list
+ */
+export async function addExceptedApp(app) {
+  try {
+    const apps = await getExceptedApps();
+    if (apps.find(a => a.packageName === app.packageName)) {
+      return false; // Already excepted
+    }
+    const newApp = { name: app.name, packageName: app.packageName, icon: app.icon };
+    const updated = [...apps, newApp];
+    await AsyncStorage.setItem(EXCEPTED_APPS_KEY, JSON.stringify(updated));
+    await syncExceptionsToNative(updated);
+    return true;
+  } catch (e) {
+    console.warn('Failed to add excepted app:', e);
+    return false;
+  }
+}
+
+/**
+ * Remove an app from the exception list
+ */
+export async function removeExceptedApp(packageName) {
+  try {
+    const apps = await getExceptedApps();
+    const updated = apps.filter(a => a.packageName !== packageName);
+    await AsyncStorage.setItem(EXCEPTED_APPS_KEY, JSON.stringify(updated));
+    await syncExceptionsToNative(updated);
+    return true;
+  } catch (e) {
+    console.warn('Failed to remove excepted app:', e);
+    return false;
+  }
+}
+
+/**
+ * Sync the exception list to native SharedPreferences
+ */
+async function syncExceptionsToNative(apps) {
+  try {
+    const packages = apps.map(a => a.packageName);
+    await setNativeExceptedPackages(packages);
+  } catch (e) {
+    console.warn('Failed to sync exceptions to native:', e);
   }
 }

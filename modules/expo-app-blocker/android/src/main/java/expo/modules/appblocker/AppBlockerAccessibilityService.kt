@@ -76,6 +76,13 @@ class AppBlockerAccessibilityService : AccessibilityService() {
             // Track open count for this app
             trackAppOpen(packageName)
 
+            // Check 0: App Exceptions — skip ALL blocking for excepted apps
+            val exceptedPrefs = applicationContext.getSharedPreferences("focuslock_excepted", Context.MODE_PRIVATE)
+            val exceptedPackages = exceptedPrefs.getStringSet("excepted_packages", emptySet()) ?: emptySet()
+            if (exceptedPackages.contains(packageName)) {
+                return
+            }
+
             // Check 1: Permanent block list
             val prefs = applicationContext.getSharedPreferences("focuslock_blocked", Context.MODE_PRIVATE)
             val blockedPackages = prefs.getStringSet("blocked_packages", emptySet()) ?: emptySet()
@@ -94,6 +101,12 @@ class AppBlockerAccessibilityService : AccessibilityService() {
             // Check 3: Daily time limits
             if (isOverDailyLimit(packageName)) {
                 blockApp(packageName, "time_limit")
+                return
+            }
+
+            // Check 4: Focus Session — block ALL apps during active session
+            if (isInFocusSession()) {
+                blockApp(packageName, "focus_session")
                 return
             }
 
@@ -166,6 +179,31 @@ class AppBlockerAccessibilityService : AccessibilityService() {
         } catch (e: Exception) {
             return false
         }
+    }
+
+    /**
+     * Check if a focus session is currently active.
+     */
+    private fun isInFocusSession(): Boolean {
+        try {
+            val prefs = applicationContext.getSharedPreferences("focuslock_focus_session", Context.MODE_PRIVATE)
+            val sessionJson = prefs.getString("session", "{}") ?: "{}"
+            val session = JSONObject(sessionJson)
+
+            if (!session.optBoolean("active", false)) return false
+
+            val now = System.currentTimeMillis()
+            val startTime = session.optLong("startTime", 0)
+            val endTime = session.optLong("endTime", 0)
+
+            if (now in startTime..endTime) {
+                return true
+            } else if (now > endTime && endTime > 0) {
+                // Session expired — auto-deactivate
+                prefs.edit().putString("session", "{}").apply()
+            }
+        } catch (e: Exception) {}
+        return false
     }
 
     /**

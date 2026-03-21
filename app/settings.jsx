@@ -446,6 +446,30 @@ export default function SettingsScreen() {
             </View>
           </View>
 
+          {/* App Exceptions Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionTitleRow}>
+              <MaterialCommunityIcons name="shield-check" size={18} color="#10b981" style={{ marginRight: 8 }} />
+              <Text style={styles.sectionTitle}>App Exceptions</Text>
+            </View>
+            <View style={styles.sectionCard}>
+              <Text style={[styles.emergencyDescription, { paddingHorizontal: 14, paddingTop: 10 }]}>
+                Apps that are never blocked, even during focus sessions, schedules, or daily limits.
+              </Text>
+              <TouchableOpacity
+                style={styles.permRow}
+                onPress={() => router.push('/exceptions')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.permLeft}>
+                  <Ionicons name="apps-outline" size={20} color="rgba(255,255,255,0.6)" style={{ marginRight: 10 }} />
+                  <Text style={styles.permTitle}>Manage Exceptions</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* About Section */}
           <View style={styles.section}>
             <View style={styles.sectionTitleRow}>

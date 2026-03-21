@@ -48,6 +48,14 @@ export default function RootLayout() {
           name="add-limit"
           options={{ animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen
+          name="focus-session"
+          options={{ animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="exceptions"
+          options={{ animation: 'slide_from_right' }}
+        />
       </Stack>
     </View>
   );

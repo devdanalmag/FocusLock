@@ -188,3 +188,58 @@ export async function getAppOpenCounts() {
   }
   return {};
 }
+
+/**
+ * Set a focus session (JSON: { active, startTime, endTime })
+ */
+export async function setFocusSession(sessionObj) {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      return await ExpoAppBlocker.setFocusSession(JSON.stringify(sessionObj));
+    } catch (e) {
+      console.warn('Failed to set focus session:', e);
+    }
+  }
+}
+
+/**
+ * Get the current focus session
+ */
+export async function getFocusSession() {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      const json = await ExpoAppBlocker.getFocusSession();
+      return JSON.parse(json || '{}');
+    } catch (e) {
+      console.warn('Failed to get focus session:', e);
+    }
+  }
+  return {};
+}
+
+/**
+ * Set excepted (whitelisted) packages
+ */
+export async function setExceptedPackages(packages) {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      return await ExpoAppBlocker.setExceptedPackages(packages);
+    } catch (e) {
+      console.warn('Failed to set excepted packages:', e);
+    }
+  }
+}
+
+/**
+ * Get excepted (whitelisted) packages
+ */
+export async function getExceptedPackages() {
+  if (ExpoAppBlocker && Platform.OS === 'android') {
+    try {
+      return await ExpoAppBlocker.getExceptedPackages();
+    } catch (e) {
+      console.warn('Failed to get excepted packages:', e);
+    }
+  }
+  return [];
+}

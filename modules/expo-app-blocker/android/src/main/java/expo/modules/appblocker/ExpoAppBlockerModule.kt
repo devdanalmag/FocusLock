@@ -242,5 +242,62 @@ class ExpoAppBlockerModule : Module() {
                 promise.resolve("{}")
             }
         }
+
+        AsyncFunction("setFocusSession") { sessionJson: String, promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.reject("ERR", "Context not available", null)
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_focus_session", Context.MODE_PRIVATE)
+                prefs.edit().putString("session", sessionJson).apply()
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("ERR", "Failed to set focus session: ${e.message}", e)
+            }
+        }
+
+        AsyncFunction("getFocusSession") { promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.resolve("{}")
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_focus_session", Context.MODE_PRIVATE)
+                promise.resolve(prefs.getString("session", "{}"))
+            } catch (e: Exception) {
+                promise.resolve("{}")
+            }
+        }
+
+        AsyncFunction("setExceptedPackages") { packages: List<String>, promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.reject("ERR", "Context not available", null)
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_excepted", Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putStringSet("excepted_packages", packages.toSet())
+                    .apply()
+                promise.resolve(true)
+            } catch (e: Exception) {
+                promise.reject("ERR", "Failed to set excepted packages: ${e.message}", e)
+            }
+        }
+
+        AsyncFunction("getExceptedPackages") { promise: Promise ->
+            try {
+                val context = appContext.reactContext ?: run {
+                    promise.resolve(emptyList<String>())
+                    return@AsyncFunction
+                }
+                val prefs = context.getSharedPreferences("focuslock_excepted", Context.MODE_PRIVATE)
+                val packages = prefs.getStringSet("excepted_packages", emptySet()) ?: emptySet()
+                promise.resolve(packages.toList())
+            } catch (e: Exception) {
+                promise.resolve(emptyList<String>())
+            }
+        }
     }
 }

@@ -67,15 +67,35 @@ class BlockedAppActivity : Activity() {
         val attemptKey = "attempts_${today}_${blockedPackage}"
         val todayAttempts = attemptsPrefs.getInt(attemptKey, 0)
 
+        // For focus sessions, read remaining time
+        if (blockReason == "focus_session") {
+            try {
+                val sessionPrefs = getSharedPreferences("focuslock_focus_session", Context.MODE_PRIVATE)
+                val sessionJson = sessionPrefs.getString("session", "{}") ?: "{}"
+                val session = JSONObject(sessionJson)
+                val endTime = session.optLong("endTime", 0)
+                if (endTime > 0) {
+                    val remaining = endTime - System.currentTimeMillis()
+                    if (remaining > 0) {
+                        val hours = ((remaining / (1000 * 60 * 60)) % 24).toInt()
+                        val minutes = ((remaining / (1000 * 60)) % 60).toInt()
+                        daysRemaining = if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+
         // Choose title/icon based on reason
         val titleText = when (blockReason) {
             "time_limit" -> "Daily Limit Reached"
             "scheduled" -> "Schedule Active"
+            "focus_session" -> "Focus Time"
             else -> "App Paused"
         }
         val iconText = when (blockReason) {
             "time_limit" -> "⏰"
             "scheduled" -> "📅"
+            "focus_session" -> "🎯"
             else -> "🔒"
         }
 
