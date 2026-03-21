@@ -32,6 +32,7 @@ export default function AddLimitScreen() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [selectedLimit, setSelectedLimit] = useState(60);
   const [existingLimits, setExistingLimits] = useState({});
+  const [loading, setLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -49,15 +50,16 @@ export default function AddLimitScreen() {
     // Filter out already limited apps and system apps
     const filtered = (installed || []).filter(a =>
       !existing[a.packageName] &&
-      a.appName &&
+      a.name &&
       !a.packageName.startsWith('com.android.')
     );
     setApps(filtered);
     setExistingLimits(existing || {});
+    setLoading(false);
   };
 
   const filteredApps = apps.filter(a =>
-    a.appName.toLowerCase().includes(search.toLowerCase())
+    a.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSave = async () => {
@@ -65,7 +67,7 @@ export default function AddLimitScreen() {
       Alert.alert('Select App', 'Please select an app to limit');
       return;
     }
-    await setAppDailyLimit(selectedApp.packageName, selectedLimit, selectedApp.appName);
+    await setAppDailyLimit(selectedApp.packageName, selectedLimit, selectedApp.name);
     router.back();
   };
 
@@ -89,11 +91,11 @@ export default function AddLimitScreen() {
           <Image source={{ uri: `data:image/png;base64,${item.icon}` }} style={styles.appIcon} />
         ) : (
           <View style={styles.appIconFallback}>
-            <Text style={styles.appIconText}>{item.appName?.[0] || '?'}</Text>
+            <Text style={styles.appIconText}>{item.name?.[0] || '?'}</Text>
           </View>
         )}
         <View style={styles.appInfo}>
-          <Text style={styles.appName} numberOfLines={1}>{item.appName}</Text>
+          <Text style={styles.appName} numberOfLines={1}>{item.name}</Text>
           <Text style={styles.appPkg} numberOfLines={1}>{item.packageName}</Text>
         </View>
         {isSelected && (
@@ -146,7 +148,7 @@ export default function AddLimitScreen() {
         {selectedApp && (
           <View style={styles.preview}>
             <Text style={styles.previewText}>
-              ⏱️ {selectedApp.appName} → max {formatLimit(selectedLimit)} per day
+              ⏱️ {selectedApp.name} → max {formatLimit(selectedLimit)} per day
             </Text>
           </View>
         )}
@@ -165,11 +167,19 @@ export default function AddLimitScreen() {
 
         {/* App List */}
         <FlatList
+          style={{ flex: 1 }}
           data={filteredApps}
           renderItem={renderApp}
           keyExtractor={item => item.packageName}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center', paddingTop: 30 }}>
+              <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
+                {loading ? 'Loading apps...' : 'No apps found'}
+              </Text>
+            </View>
+          }
         />
       </Animated.View>
     </View>

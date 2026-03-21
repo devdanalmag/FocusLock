@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Animated,
   FlatList,
+  ScrollView,
   Platform,
   RefreshControl,
   Image,
@@ -235,7 +236,7 @@ export default function DashboardScreen() {
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Active Locks</Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
           <TouchableOpacity
             style={styles.viewStatsButton}
             onPress={() => router.push('/achievements')}
@@ -267,7 +268,7 @@ export default function DashboardScreen() {
             <Ionicons name="stats-chart" size={14} color="#a78bfa" style={{ marginRight: 4 }} />
             <Text style={styles.viewStatsText}>Stats</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </View>
 
       {/* Achievement Banner */}
