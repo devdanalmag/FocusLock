@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - FocusLock</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151c2e;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #6366f1;
+            --border: #242f47;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.65;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        h1 {
+            font-size: 2.2rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        h2 {
+            font-size: 1.35rem;
+            color: #e0e7ff;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        p {
+            color: #d1d5db;
+            margin-bottom: 14px;
+        }
+        ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .highlight-box {
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+        a {
+            color: #818cf8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <div class="subtitle">
+            <strong>App Name:</strong> FocusLock &bull; <strong>Package:</strong> com.focuslockapp.app &bull; <strong>Last Updated:</strong> August 26, 2026
+        </div>
+
+        <p>FocusLock ("we", "our", or "us") is dedicated to protecting your privacy. This Privacy Policy explains how our mobile application handles user information, device permissions, and data protection.</p>
+
+        <h2>1. Summary & Core Privacy Principles</h2>
+        <div class="highlight-box">
+            <p><strong>Your privacy is our priority:</strong> FocusLock is an on-device digital wellbeing and productivity tool. <strong>We do not collect, sell, or transmit your personal data, app usage details, or device interactions to external servers or third parties.</strong> All data stays stored strictly on your local device.</p>
+        </div>
+
+        <h2>2. Sensitive Permissions & Specific Disclosures</h2>
+        <p>To provide its core app-blocking, focus timers, and digital wellbeing features, FocusLock requests access to specific Android permissions as detailed below:</p>
+
+        <h3>A. Accessibility Service API (AccessibilityService)</h3>
+        <p>FocusLock uses Android's AccessibilityService API solely for the following explicit purpose:</p>
+        <ul>
+            <li><strong>Foreground App Detection & Blocking:</strong> When you initiate a focus session or reach a configured daily usage limit for selected apps, the Accessibility Service detects when a restricted app is brought to the foreground and presents the FocusLock blocking screen to help you stay on track.</li>
+            <li><strong>Strict Mode Protection:</strong> If Strict Mode is enabled by the user, the service assists in preventing bypass actions while a session is actively running.</li>
+        </ul>
+        <p><strong>Explicit Privacy Guarantee:</strong> The Accessibility Service API is <strong>NEVER</strong> used to:</p>
+        <ul>
+            <li>Record or log keystrokes (no keylogger functionality).</li>
+            <li>Read personal messages, emails, chats, or input fields.</li>
+            <li>Capture or view private screen content, images, or media.</li>
+            <li>Collect personal user data for marketing, analytics, or advertising.</li>
+        </ul>
+
+        <h3>B. Usage Stats Access (PACKAGE_USAGE_STATS)</h3>
+        <p>FocusLock requires Usage Access to:</p>
+        <ul>
+            <li>Track daily screen time and usage duration for apps you select.</li>
+            <li>Enforce daily time limits that you have configured.</li>
+            <li>Display personal usage analytics and focus charts on your device.</li>
+        </ul>
+        <p>All usage calculations and statistics are processed and stored locally on your device and are never sent over the network.</p>
+
+        <h3>C. Device Administration (BIND_DEVICE_ADMIN)</h3>
+        <p>FocusLock optionally offers Device Administrator privileges solely if the user enables "Uninstall Protection" or "Strict Mode". This prevents the app from being uninstalled during an active, locked focus timer. This permission can be deactivated at any time when no strict lock timer is running.</p>
+
+        <h3>D. Notification Policy Access (ACCESS_NOTIFICATION_POLICY)</h3>
+        <p>Used solely to automatically toggle Do Not Disturb (DND) mode during active focus sessions if the user chooses to mute incoming interruptions.</p>
+
+        <h2>3. Data Collection and Sharing</h2>
+        <ul>
+            <li><strong>Personal Information:</strong> We do not require you to create an account, provide your name, or submit your email address to use the core features of FocusLock.</li>
+            <li><strong>Third-Party Sharing:</strong> We do not sell, rent, or trade your usage data or personal information to third parties, advertising networks, or data brokers.</li>
+            <li><strong>Local Storage:</strong> All session history, focus streaks, custom schedules, and blocked app lists are stored locally in your device's private sandbox storage.</li>
+        </ul>
+
+        <h2>4. Data Retention and Deletion</h2>
+        <p>Since all data is stored locally on your device, you have complete control over your data at all times. You can delete all your stored data, session history, and preferences at any time by clearing the application data in your Android Settings or by uninstalling FocusLock.</p>
+
+        <h2>5. Children's Privacy</h2>
+        <p>FocusLock does not knowingly collect or solicit personal information from children under the age of 13. The app is a general-purpose productivity and self-control tool designed in compliance with Google Play Families and COPPA policies.</p>
+
+        <h2>6. Changes to this Privacy Policy</h2>
+        <p>We may update our Privacy Policy periodically. Any updates will be posted on this page with an updated revision date.</p>
+
+        <h2>7. Contact Us</h2>
+        <p>If you have any questions, feedback, or concerns regarding this Privacy Policy or the security of your data, please contact us at:</p>
+        <p>
+            <strong>Developer:</strong> Dev Dan Almag<br>
+            <strong>GitHub:</strong> <a href="https://github.com/devdanalmag/FocusLock" target="_blank" rel="noopener noreferrer">https://github.com/devdanalmag/FocusLock</a><br>
+            <strong>Email:</strong> <a href="mailto:devdanalmag@gmail.com">devdanalmag@gmail.com</a>
+        </p>
+
+        <div class="footer">
+            &copy; 2026 FocusLock. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
